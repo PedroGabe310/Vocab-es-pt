@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { userProgress, words, streak, sessions } from "@/db/schema";
 import { levelFromXp } from "@/lib/xp";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const now = new Date();
 

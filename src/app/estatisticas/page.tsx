@@ -4,6 +4,8 @@ import { words, userProgress, sessions, reviewLog } from "@/db/schema";
 import { classifyWord, type MasteryStatus } from "@/lib/mastery";
 import { levelFromXp } from "@/lib/xp";
 
+export const dynamic = "force-dynamic";
+
 const STATUS_META: Record<MasteryStatus, { label: string; bgClass: string }> = {
   novo: { label: "Novas", bgClass: "bg-[#2a78d6] dark:bg-[#3987e5]" },
   aprendizado: { label: "Em aprendizado", bgClass: "bg-[#eb6834] dark:bg-[#d95926]" },

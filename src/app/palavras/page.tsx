@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { words } from "@/db/schema";
 import { addWord, deleteWord, importWordsCsv } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function PalavrasPage() {
   const allWords = await db.select().from(words).orderBy(desc(words.createdAt));
 
