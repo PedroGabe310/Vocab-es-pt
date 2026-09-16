@@ -64,6 +64,16 @@ export const sessions = pgTable("sessions", {
   xpEarned: integer("xp_earned").notNull().default(0),
 });
 
+export const reviewLog = pgTable("review_log", {
+  id: serial("id").primaryKey(),
+  wordId: integer("word_id")
+    .notNull()
+    .references(() => words.id, { onDelete: "cascade" }),
+  direction: text("direction", { enum: directionEnum }).notNull(),
+  correct: boolean("correct").notNull(),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const streak = pgTable("streak", {
   id: serial("id").primaryKey(),
   currentStreak: integer("current_streak").notNull().default(0),

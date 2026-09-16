@@ -16,10 +16,11 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const category = new URL(request.url).searchParams.get("category");
   const now = new Date();
 
-  const dueRows = await db
+  const dueRowsRaw = await db
     .select({
       wordId: userProgress.wordId,
       direction: userProgress.direction,
@@ -28,12 +29,17 @@ export async function GET() {
       wordPt: words.wordPt,
       isFalseCognate: words.isFalseCognate,
       falseMeaningNote: words.falseMeaningNote,
+      category: words.category,
     })
     .from(userProgress)
     .innerJoin(words, eq(userProgress.wordId, words.id))
     .where(lte(userProgress.nextReviewAt, now))
-    .orderBy(asc(userProgress.nextReviewAt))
-    .limit(DUE_LIMIT);
+    .orderBy(asc(userProgress.nextReviewAt));
+
+  const dueRows = (category ? dueRowsRaw.filter((r) => r.category === category) : dueRowsRaw).slice(
+    0,
+    DUE_LIMIT,
+  );
 
   const allWords = await db.select().from(words);
   const seenRows = await db
@@ -41,7 +47,8 @@ export async function GET() {
     .from(userProgress);
   const seenIds = new Set(seenRows.map((r) => r.wordId));
 
-  const newWords = shuffle(allWords.filter((w) => !seenIds.has(w.id))).slice(
+  const candidateWords = category ? allWords.filter((w) => w.category === category) : allWords;
+  const newWords = shuffle(candidateWords.filter((w) => !seenIds.has(w.id))).slice(
     0,
     Math.max(0, SESSION_SIZE - dueRows.length),
   );

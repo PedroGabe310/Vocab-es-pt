@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { userProgress, type Direction } from "@/db/schema";
+import { userProgress, reviewLog, type Direction } from "@/db/schema";
 import { applySm2, nextReviewDate } from "@/lib/srs";
 
 export async function POST(request: Request) {
@@ -55,6 +55,8 @@ export async function POST(request: Request) {
       lastResult: correct,
     });
   }
+
+  await db.insert(reviewLog).values({ wordId, direction, correct });
 
   return NextResponse.json({ ok: true, nextReviewAt });
 }

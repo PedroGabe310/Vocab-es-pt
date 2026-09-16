@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { SessionItem } from "@/lib/session-types";
 
 type Phase = "loading" | "empty" | "playing" | "summary";
@@ -8,6 +9,17 @@ type Phase = "loading" | "empty" | "playing" | "summary";
 type Feedback = { correct: boolean; correctAnswer: string } | null;
 
 export default function SessaoPage() {
+  return (
+    <Suspense>
+      <SessaoContent />
+    </Suspense>
+  );
+}
+
+function SessaoContent() {
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category");
+
   const [phase, setPhase] = useState<Phase>("loading");
   const [items, setItems] = useState<SessionItem[]>([]);
   const [index, setIndex] = useState(0);
@@ -20,13 +32,14 @@ export default function SessaoPage() {
   );
 
   useEffect(() => {
-    fetch("/api/session/start")
+    const url = category ? `/api/session/start?category=${encodeURIComponent(category)}` : "/api/session/start";
+    fetch(url)
       .then((r) => r.json())
       .then((data: { items: SessionItem[] }) => {
         setItems(data.items);
         setPhase(data.items.length === 0 ? "empty" : "playing");
       });
-  }, []);
+  }, [category]);
 
   const current = items[index];
 
@@ -118,8 +131,11 @@ export default function SessaoPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-10">
-      <div className="text-center text-sm text-zinc-500">
-        {index + 1} / {items.length}
+      <div className="flex flex-col items-center gap-1 text-center text-sm text-zinc-500">
+        <span>
+          {index + 1} / {items.length}
+        </span>
+        {category && <span className="text-xs">Filtro: {category}</span>}
       </div>
 
       <div className="flex flex-col items-center gap-2">
